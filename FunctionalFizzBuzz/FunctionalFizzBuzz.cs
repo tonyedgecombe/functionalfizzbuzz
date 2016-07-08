@@ -1,6 +1,5 @@
 ﻿using System;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 // ReSharper disable ArrangeTypeMemberModifiers
@@ -30,6 +29,8 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, dynamic, Func<dynamic, dynamic, dynamic, dynamic>> SUCC = (s, z, i) => (s2, z2, i2) => i2(s);
 
         static Func<dynamic, Func<dynamic, dynamic, dynamic>> IS_ZERO = n => (t, f) => n(f, t, CONST(f));
+
+        // Helpers for tests
 
         private bool ToBool(dynamic f)
         {
@@ -64,6 +65,8 @@ namespace FunctionalFizzBuzz
 
             return result;
         }
+
+        // Tests
 
         [Test]
         public void IsZero()
@@ -105,8 +108,8 @@ namespace FunctionalFizzBuzz
             Assert.That(ToBool(OR(FromBool(true), FromBool(false))), Is.True);
             Assert.That(ToBool(OR(FromBool(false), FromBool(false))), Is.False);
 
-            Assert.That(ToBool(NOT(FromBool(true))), Is.False);
-            Assert.That(ToBool(NOT(FromBool(false))), Is.True);
+            Assert.That(ToBool(NOT(T)), Is.False);
+            Assert.That(ToBool(NOT(F)), Is.True);
         }
     }
 }
