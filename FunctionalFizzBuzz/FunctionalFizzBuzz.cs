@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using NUnit.Framework;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
@@ -14,6 +15,7 @@ namespace FunctionalFizzBuzz
     {
         static Func<dynamic, dynamic> ID = x => x;
         static Func<dynamic, Func<dynamic, dynamic>> CONST = c => _ => c;
+        static Func<dynamic, Func<dynamic, dynamic, dynamic>> CONST2 = c => (_1, _2) => c;
         static Func<dynamic, Func<dynamic>> RETURN = r => () => r;
 
         static Func<dynamic, dynamic, dynamic> TRUE = (t, f) => t;
@@ -39,7 +41,7 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, Func<dynamic>> _SUB = (a, b) => () => IF(IS_ZERO(b), RETURN(a), _SUB(PREV(a), PREV(b)))();
         static Func<dynamic, dynamic, dynamic> SUB = (a, b) => _SUB(a, b)();
 
-        private static Func<dynamic, dynamic, dynamic, Func<dynamic>> _MUL = (a, b, t) => () => IF(IS_ZERO(a), RETURN(t), _MUL(PREV(a), b, ADD(b,t)))();
+        static Func<dynamic, dynamic, dynamic, Func<dynamic>> _MUL = (a, b, t) => () => IF(IS_ZERO(a), RETURN(t), _MUL(PREV(a), b, ADD(b,t)))();
         static Func<dynamic, dynamic, dynamic> MUL = (a, b) => _MUL(a, b, ZERO)();
 
         static Func<dynamic, dynamic, Func<Func<dynamic, dynamic, dynamic>>> _LESS_THAN = (a, b) => () => IF(IS_ZERO(b), RETURN(FALSE), IF(IS_ZERO(a), RETURN(TRUE), _LESS_THAN(PREV(a), PREV(b))))();
@@ -57,52 +59,73 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, dynamic> TWO = SUCC(ONE);
         static Func<dynamic, dynamic, dynamic> THREE = SUCC(TWO);
         static Func<dynamic, dynamic, dynamic> FOUR = SUCC(THREE);
-        static Func<dynamic, dynamic, dynamic> FIVE = SUCC(SUCC(THREE));
+        static Func<dynamic, dynamic, dynamic> FIVE = SUCC(FOUR);
+        static Func<dynamic, dynamic, dynamic> SIX = SUCC(FIVE);
+        static Func<dynamic, dynamic, dynamic> SEVEN = SUCC(SIX);
+        static Func<dynamic, dynamic, dynamic> EIGHT = SUCC(SEVEN);
         static Func<dynamic, dynamic, dynamic> TEN = MUL(TWO, FIVE);
+        static Func<dynamic, dynamic, dynamic> SIXTY_FOUR = MUL(EIGHT, EIGHT);
         static Func<dynamic, dynamic, dynamic> ONE_HUNDRED = MUL(TEN, TEN);
 
+        // Characters
+        static Func<dynamic, dynamic, dynamic> A = SUCC(SIXTY_FOUR);
+        static Func<dynamic, dynamic, dynamic> B = SUCC(A);
+        static Func<dynamic, dynamic, dynamic> C = SUCC(B);
+        static Func<dynamic, dynamic, dynamic> D = SUCC(C);
+        static Func<dynamic, dynamic, dynamic> E = SUCC(D);
+        static Func<dynamic, dynamic, dynamic> F = SUCC(E);
+        static Func<dynamic, dynamic, dynamic> G = SUCC(F);
+        static Func<dynamic, dynamic, dynamic> H = SUCC(G);
+        static Func<dynamic, dynamic, dynamic> I = SUCC(H);
+        static Func<dynamic, dynamic, dynamic> J = SUCC(I);
+        static Func<dynamic, dynamic, dynamic> K = SUCC(J);
+        static Func<dynamic, dynamic, dynamic> L = SUCC(K);
+        static Func<dynamic, dynamic, dynamic> M = SUCC(L);
+        static Func<dynamic, dynamic, dynamic> N = SUCC(M);
+        static Func<dynamic, dynamic, dynamic> O = SUCC(N);
+        static Func<dynamic, dynamic, dynamic> P = SUCC(O);
+        static Func<dynamic, dynamic, dynamic> Q = SUCC(P);
+        static Func<dynamic, dynamic, dynamic> R = SUCC(Q);
+        static Func<dynamic, dynamic, dynamic> S = SUCC(R);
+        static Func<dynamic, dynamic, dynamic> T = SUCC(S);
+        static Func<dynamic, dynamic, dynamic> U = SUCC(T);
+        static Func<dynamic, dynamic, dynamic> V = SUCC(U);
+        static Func<dynamic, dynamic, dynamic> W = SUCC(V);
+        static Func<dynamic, dynamic, dynamic> X = SUCC(W);
+        static Func<dynamic, dynamic, dynamic> Y = SUCC(X);
+        static Func<dynamic, dynamic, dynamic> Z = SUCC(Y);
+
+        static Func<dynamic, dynamic, dynamic> FIRST = (f, s) => f;
+        static Func<dynamic, dynamic, dynamic> SECOND = (f, s) => s;
+
+        static Func<dynamic, dynamic, dynamic, dynamic> END = (e, n, _) => e;
+        static Func<dynamic, dynamic, Func<dynamic, dynamic, dynamic, dynamic>> CHR = (c, n) => (_1, _2, i) => i(c, n);
+
+        static Func<dynamic, dynamic, dynamic, dynamic> FIZZ = CHR(F, CHR(I, CHR(Z, CHR(Z, END))));
+        static Func<dynamic, dynamic, dynamic, dynamic> BUZZ = CHR(B, CHR(U, CHR(Z, CHR(Z, END))));
+        static Func<dynamic, dynamic, dynamic, dynamic> FIZZBUZZ = CHR(F, CHR(I, CHR(Z, CHR(Z, BUZZ))));
+
+
         // Helpers for tests
-
-        [Test]
-        public void Mul()
+        private string ToString(dynamic s)
         {
-            for (int i = 0; i < 4; i++)
+            StringBuilder sb = new StringBuilder();
+
+            while (!s(true, false, CONST2(false)))
             {
-                for (int j = 0; j < 4; j++)
-                {
-                    Assert.That(ToNumber(MUL(fromNumber(i), fromNumber(j))), Is.EqualTo(i*j));
-                }
+                sb.Append((char)ToNumber(s(false, false, FIRST)));
+
+                s = s(false, false, SECOND);
             }
+            return sb.ToString();
         }
 
         [Test]
-        public void Constants()
+        public void String()
         {
-            Assert.That(ToNumber(ONE), Is.EqualTo(1));    
-            Assert.That(ToNumber(TWO), Is.EqualTo(2));    
-            Assert.That(ToNumber(THREE), Is.EqualTo(3));    
-            Assert.That(ToNumber(FOUR), Is.EqualTo(4));    
-            Assert.That(ToNumber(FIVE), Is.EqualTo(5));    
-            Assert.That(ToNumber(TEN), Is.EqualTo(10));    
-            Assert.That(ToNumber(ONE_HUNDRED), Is.EqualTo(100));    
-        }
-
-        [Test]
-        public void WithRange()
-        {
-
-            var result = 0;
-            WITH_RANGE(fromNumber(1), fromNumber(100), new Func<int>(() => result++));
-            Assert.That(result, Is.EqualTo(100));
-        }
-
-        [Test]
-        public void Mod()
-        {
-            Assert.That(ToNumber(MOD(fromNumber(4), fromNumber(5))), Is.EqualTo(4));
-            Assert.That(ToNumber(MOD(fromNumber(5), fromNumber(5))), Is.EqualTo(0));
-            Assert.That(ToNumber(MOD(fromNumber(8), fromNumber(5))), Is.EqualTo(3));
-            Assert.That(ToNumber(MOD(fromNumber(13), fromNumber(5))), Is.EqualTo(3));
+            Assert.That(ToString(FIZZ), Is.EqualTo("FIZZ"));
+            Assert.That(ToString(BUZZ), Is.EqualTo("BUZZ"));
+            Assert.That(ToString(FIZZBUZZ), Is.EqualTo("FIZZBUZZ"));
         }
 
         private bool ToBool(dynamic f)
@@ -130,6 +153,51 @@ namespace FunctionalFizzBuzz
             }
 
             return result;
+        }
+
+        [Test]
+        public void Constants()
+        {
+            Assert.That(ToNumber(ONE), Is.EqualTo(1));    
+            Assert.That(ToNumber(TWO), Is.EqualTo(2));    
+            Assert.That(ToNumber(THREE), Is.EqualTo(3));    
+            Assert.That(ToNumber(FOUR), Is.EqualTo(4));    
+            Assert.That(ToNumber(FIVE), Is.EqualTo(5));    
+            Assert.That(ToNumber(SIX), Is.EqualTo(6));    
+            Assert.That(ToNumber(SEVEN), Is.EqualTo(7));    
+            Assert.That(ToNumber(EIGHT), Is.EqualTo(8));    
+            Assert.That(ToNumber(TEN), Is.EqualTo(10));    
+            Assert.That(ToNumber(ONE_HUNDRED), Is.EqualTo(100));    
+        }
+
+        [Test]
+        public void WithRange()
+        {
+
+            var result = 0;
+            WITH_RANGE(fromNumber(1), fromNumber(100), new Func<int>(() => result++));
+            Assert.That(result, Is.EqualTo(100));
+        }
+
+        [Test]
+        public void Mul()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    Assert.That(ToNumber(MUL(fromNumber(i), fromNumber(j))), Is.EqualTo(i*j));
+                }
+            }
+        }
+
+        [Test]
+        public void Mod()
+        {
+            Assert.That(ToNumber(MOD(fromNumber(4), fromNumber(5))), Is.EqualTo(4));
+            Assert.That(ToNumber(MOD(fromNumber(5), fromNumber(5))), Is.EqualTo(0));
+            Assert.That(ToNumber(MOD(fromNumber(8), fromNumber(5))), Is.EqualTo(3));
+            Assert.That(ToNumber(MOD(fromNumber(13), fromNumber(5))), Is.EqualTo(3));
         }
 
         [Test]
