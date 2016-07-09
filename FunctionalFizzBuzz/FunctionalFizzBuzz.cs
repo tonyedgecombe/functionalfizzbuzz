@@ -26,13 +26,13 @@ namespace FunctionalFizzBuzz
 
         static Func<Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>> NOT = a => IF(a, F, T);
 
-        static Func<dynamic, dynamic, dynamic, dynamic> ZERO = (_1, z, _2) => z;
-        static Func<dynamic, Func<dynamic, dynamic, dynamic, dynamic>> SUCC = s => (_1, _2, i) => i(s);
+        static Func<dynamic, dynamic, dynamic> ZERO = (z, _) => z;
+        static Func<dynamic, Func<dynamic, dynamic, dynamic>> SUCC = s => (_, i) => i(s);
 
-        static Func<dynamic, dynamic>  PREV = (n) => n(F, F, ID);
+        static Func<dynamic, dynamic>  PREV = (n) => n(F, ID);
 
 
-        static Func<dynamic, Func<dynamic, dynamic, dynamic>> IS_ZERO = n => (t, f) => n(f, t, CONST(f));
+        static Func<dynamic, Func<dynamic, dynamic, dynamic>> IS_ZERO = n => (t, f) => n(t, CONST(f));
 
         static Func<dynamic, dynamic, Func<dynamic>> ADD = (a, b) => () => IF(IS_ZERO(b), RETURN(a), ADD(SUCC(a), PREV(b)))();
 
@@ -58,9 +58,9 @@ namespace FunctionalFizzBuzz
         private int ToNumber(dynamic n)
         {
             var result = 0;
-            while (!(n(false, true, ID) is bool))
+            while (!n(true, CONST(false)))
             {
-                n = n(false, false, ID);
+                n = n(false, ID);
                 result++;
             }
 
