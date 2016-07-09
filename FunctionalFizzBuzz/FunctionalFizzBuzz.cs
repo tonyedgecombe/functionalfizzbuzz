@@ -49,11 +49,27 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, dynamic, Func<dynamic>> _WITH_RANGE = (n, m, a) => () => IF(LESS_THAN(n(), m()), _WITH_RANGE(RETURN(SUCC(n())), m, ACTION(a)), RETURN(FALSE))();
         static Func<dynamic, dynamic, dynamic, dynamic> WITH_RANGE = (n, m, a) => _WITH_RANGE(RETURN(n), RETURN(m), a)();
 
+        // Some constants
+        static Func<dynamic, dynamic, dynamic> ONE = SUCC(ZERO);
+        static Func<dynamic, dynamic, dynamic> TWO = SUCC(ONE);
+        static Func<dynamic, dynamic, dynamic> THREE = SUCC(TWO);
+        static Func<dynamic, dynamic, dynamic> FIVE = SUCC(SUCC(THREE));
+
         // Helpers for tests
+
+        [Test]
+        public void Constants()
+        {
+            Assert.That(ToNumber(ONE), Is.EqualTo(1));    
+            Assert.That(ToNumber(TWO), Is.EqualTo(2));    
+            Assert.That(ToNumber(THREE), Is.EqualTo(3));    
+            Assert.That(ToNumber(FIVE), Is.EqualTo(5));    
+        }
 
         [Test]
         public void WithRange()
         {
+
             var result = 0;
             WITH_RANGE(fromNumber(1), fromNumber(100), new Func<int>(() => result++));
             Assert.That(result, Is.EqualTo(100));
