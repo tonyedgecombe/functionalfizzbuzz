@@ -39,7 +39,7 @@ namespace FunctionalFizzBuzz
 
         static Func<dynamic, dynamic, Func<Func<dynamic, dynamic, dynamic>>> LESS_THAN = (a, b) => () => IF(IS_ZERO(b), RETURN(F), IF(IS_ZERO(a), RETURN(T), LESS_THAN(PREV(a), PREV(b))))();
 
-        static Func<dynamic, dynamic, Func<dynamic>> _MOD = (n, m) => () => IF(LESS_THAN(n(), m())(), RETURN(n()), _MOD(_SUB(n(), m()), m))();
+        static Func<dynamic, dynamic, Func<dynamic>> _MOD = (n, m) => () => IF(LESS_THAN(n(), m())(), n, _MOD(_SUB(n(), m()), m))();
         static Func<dynamic, dynamic, dynamic> MOD = (n, m) => _MOD(RETURN(n), RETURN(m))();
 
         // Helpers for tests
