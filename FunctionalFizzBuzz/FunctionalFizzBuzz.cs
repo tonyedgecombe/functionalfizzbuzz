@@ -42,7 +42,19 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, Func<dynamic>> _MOD = (n, m) => () => IF(LESS_THAN(n(), m())(), n, _MOD(_SUB(n(), m()), m))();
         static Func<dynamic, dynamic, dynamic> MOD = (n, m) => _MOD(RETURN(n), RETURN(m))();
 
+        private static Func<dynamic, dynamic> ACTION = a => IF(T, a, a());
+        static Func<dynamic, dynamic, dynamic, Func<dynamic>> _WITH_RANGE = (n, m, a) => () => IF(LESS_THAN(n(), m())(), _WITH_RANGE(RETURN(SUCC(n())), m, ACTION(a)), RETURN(F))();
+        static Func<dynamic, dynamic, dynamic, dynamic> WITH_RANGE = (n, m, a) => _WITH_RANGE(RETURN(n), RETURN(m), a)();
+
         // Helpers for tests
+
+        [Test]
+        public void WithRange()
+        {
+            var result = 0;
+            WITH_RANGE(fromNumber(1), fromNumber(100), new Func<int>(() => result++));
+            Assert.That(result, Is.EqualTo(100));
+        }
 
         [Test]
         public void Mod()
