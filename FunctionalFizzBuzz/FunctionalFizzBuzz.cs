@@ -19,6 +19,8 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, Func<dynamic, dynamic, dynamic>> CONST2 = c => (_1, _2) => c;
         static Func<dynamic, Func<dynamic>> RETURN = r => () => r;
 
+        private static Func<dynamic> _I = () => F;
+
         static Func<dynamic, dynamic, dynamic> TRUE = (t, f) => t;
         static Func<dynamic, dynamic, dynamic> FALSE = (t, f) => f;
 
@@ -65,6 +67,8 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, dynamic> SEVEN = SUCC(SIX);
         static Func<dynamic, dynamic, dynamic> EIGHT = SUCC(SEVEN);
         static Func<dynamic, dynamic, dynamic> TEN = MUL(TWO, FIVE);
+        static Func<dynamic, dynamic, dynamic> SIXTEEN = MUL(TWO, EIGHT);
+        static Func<dynamic, dynamic, dynamic> FORTY_EIGHT = MUL(SIXTEEN, THREE);
         static Func<dynamic, dynamic, dynamic> SIXTY_FOUR = MUL(EIGHT, EIGHT);
         static Func<dynamic, dynamic, dynamic> ONE_HUNDRED = MUL(TEN, TEN);
 
@@ -104,16 +108,18 @@ namespace FunctionalFizzBuzz
 
         static Func<dynamic, dynamic, Func<dynamic, dynamic, dynamic, dynamic>> CHR = (c, n) => (_1, _2, i) => i(c, n);
 
+        static Func<dynamic, dynamic, Func<dynamic>> _JOIN = (l, r) => () => CHR(l()(_I, _I, FIRST), IF(IS_END(l()(_I, _I, SECOND)), r, _JOIN(RETURN(l()(_I, _I, SECOND)), r))());
+        static Func<dynamic, dynamic, dynamic> JOIN = (l, r) => _JOIN(RETURN(l), RETURN(r))();
+
         static Func<dynamic, dynamic, dynamic, dynamic> FIZZ = CHR(F, CHR(I, CHR(Z, CHR(Z, END))));
         static Func<dynamic, dynamic, dynamic, dynamic> BUZZ = CHR(B, CHR(U, CHR(Z, CHR(Z, END))));
-        static Func<dynamic, dynamic, dynamic, dynamic> FIZZBUZZ = CHR(F, CHR(I, CHR(Z, CHR(Z, BUZZ))));
+        static Func<dynamic, dynamic, dynamic, dynamic> FIZZBUZZ = JOIN(FIZZ, BUZZ);
 
-        static Func<dynamic, dynamic, Func<dynamic>> FUNCTOR = (s, a) => () => a(s);
         static Func<dynamic> NULL_FUNCTION = () => F;
         static Func<dynamic, dynamic, Func<dynamic>> ACTION2 = (s, a) => () => IF(TRUE, a, a(s));
 
 
-        private static Func<dynamic, dynamic, Func<dynamic>> _PRINT = (s, a) => () => IF(IS_END(s()), NULL_FUNCTION, _PRINT(RETURN(s()(F, F, SECOND)), ACTION2(s(),a())))();
+        static Func<dynamic, dynamic, Func<dynamic>> _PRINT = (s, a) => () => IF(IS_END(s()), NULL_FUNCTION, _PRINT(RETURN(s()(F, F, SECOND)), ACTION2(s(),a())))();
         static Func<dynamic, dynamic, dynamic> PRINT = (s, a) => _PRINT(RETURN(s), RETURN(a))();
 
         // Helpers for tests
@@ -159,6 +165,12 @@ namespace FunctionalFizzBuzz
         }
 
         [Test]
+        public void Join()
+        {
+            Assert.That(ToString(JOIN(CHR(A, END), CHR(B, END))), Is.EqualTo("AB"));
+        }
+
+        [Test]
         public void Print()
         {
             var writer = new StringWriter();
@@ -201,6 +213,8 @@ namespace FunctionalFizzBuzz
             Assert.That(ToNumber(SEVEN), Is.EqualTo(7));    
             Assert.That(ToNumber(EIGHT), Is.EqualTo(8));    
             Assert.That(ToNumber(TEN), Is.EqualTo(10));    
+            Assert.That(ToNumber(SIXTEEN), Is.EqualTo(16));    
+            Assert.That(ToNumber(FORTY_EIGHT), Is.EqualTo(48));    
             Assert.That(ToNumber(ONE_HUNDRED), Is.EqualTo(100));    
         }
 
