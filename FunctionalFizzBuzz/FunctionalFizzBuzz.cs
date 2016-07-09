@@ -33,17 +33,20 @@ namespace FunctionalFizzBuzz
 
         static Func<dynamic, Func<dynamic, dynamic, dynamic>> IS_ZERO = n => (t, f) => n(t, CONST(f));
 
-        static Func<dynamic, dynamic, Func<dynamic>> ADD = (a, b) => () => IF(IS_ZERO(b), RETURN(a), ADD(SUCC(a), PREV(b)))();
+        static Func<dynamic, dynamic, Func<dynamic>> _ADD = (a, b) => () => IF(IS_ZERO(b), RETURN(a), _ADD(SUCC(a), PREV(b)))();
+        static Func<dynamic, dynamic, dynamic> ADD = (a, b) => _ADD(a, b)();
+
         static Func<dynamic, dynamic, Func<dynamic>> _SUB = (a, b) => () => IF(IS_ZERO(b), RETURN(a), _SUB(PREV(a), PREV(b)))();
         static Func<dynamic, dynamic, dynamic> SUB = (a, b) => _SUB(a, b)();
 
-        static Func<dynamic, dynamic, Func<Func<dynamic, dynamic, dynamic>>> LESS_THAN = (a, b) => () => IF(IS_ZERO(b), RETURN(FALSE), IF(IS_ZERO(a), RETURN(TRUE), LESS_THAN(PREV(a), PREV(b))))();
+        static Func<dynamic, dynamic, Func<Func<dynamic, dynamic, dynamic>>> _LESS_THAN = (a, b) => () => IF(IS_ZERO(b), RETURN(FALSE), IF(IS_ZERO(a), RETURN(TRUE), _LESS_THAN(PREV(a), PREV(b))))();
+        static Func<dynamic, dynamic, dynamic> LESS_THAN = (a, b) => _LESS_THAN(a, b)();
 
-        static Func<dynamic, dynamic, Func<dynamic>> _MOD = (n, m) => () => IF(LESS_THAN(n(), m())(), n, _MOD(_SUB(n(), m()), m))();
+        static Func<dynamic, dynamic, Func<dynamic>> _MOD = (n, m) => () => IF(LESS_THAN(n(), m()), n, _MOD(_SUB(n(), m()), m))();
         static Func<dynamic, dynamic, dynamic> MOD = (n, m) => _MOD(RETURN(n), RETURN(m))();
 
         static Func<dynamic, dynamic> ACTION = a => IF(TRUE, a, a());
-        static Func<dynamic, dynamic, dynamic, Func<dynamic>> _WITH_RANGE = (n, m, a) => () => IF(LESS_THAN(n(), m())(), _WITH_RANGE(RETURN(SUCC(n())), m, ACTION(a)), RETURN(FALSE))();
+        static Func<dynamic, dynamic, dynamic, Func<dynamic>> _WITH_RANGE = (n, m, a) => () => IF(LESS_THAN(n(), m()), _WITH_RANGE(RETURN(SUCC(n())), m, ACTION(a)), RETURN(FALSE))();
         static Func<dynamic, dynamic, dynamic, dynamic> WITH_RANGE = (n, m, a) => _WITH_RANGE(RETURN(n), RETURN(m), a)();
 
         // Helpers for tests
@@ -99,7 +102,7 @@ namespace FunctionalFizzBuzz
             {
                 for (int j = 0; j < 10; j++)
                 {
-                    Assert.That(ToBool(LESS_THAN(fromNumber(i), fromNumber(j))()), Is.EqualTo(i < j));
+                    Assert.That(ToBool(LESS_THAN(fromNumber(i), fromNumber(j))), Is.EqualTo(i < j));
                 }
             }
         }
@@ -108,10 +111,10 @@ namespace FunctionalFizzBuzz
         [Test]
         public void Add()
         {
-            Assert.That(ToNumber(ADD(ZERO, ZERO)()), Is.EqualTo(0));
-            Assert.That(ToNumber(ADD(fromNumber(1), ZERO)()), Is.EqualTo(1));
-            Assert.That(ToNumber(ADD(fromNumber(1), fromNumber(1))()), Is.EqualTo(2));
-            Assert.That(ToNumber(ADD(fromNumber(3), fromNumber(4))()), Is.EqualTo(7));
+            Assert.That(ToNumber(ADD(ZERO, ZERO)), Is.EqualTo(0));
+            Assert.That(ToNumber(ADD(fromNumber(1), ZERO)), Is.EqualTo(1));
+            Assert.That(ToNumber(ADD(fromNumber(1), fromNumber(1))), Is.EqualTo(2));
+            Assert.That(ToNumber(ADD(fromNumber(3), fromNumber(4))), Is.EqualTo(7));
         }
 
         [Test]
