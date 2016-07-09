@@ -36,6 +36,8 @@ namespace FunctionalFizzBuzz
 
         static Func<dynamic, dynamic, Func<dynamic>> ADD = (a, b) => () => IF(IS_ZERO(b), RETURN(a), ADD(SUCC(a), PREV(b)))();
 
+        static Func<dynamic, dynamic, Func<dynamic>> SUB = (a, b) => () => IF(IS_ZERO(b), RETURN(a), SUB(PREV(a), PREV(b)))();
+
         // Helpers for tests
 
         private bool ToBool(dynamic f)
@@ -74,6 +76,14 @@ namespace FunctionalFizzBuzz
             Assert.That(ToNumber(ADD(fromNumber(1), ZERO)()), Is.EqualTo(1));
             Assert.That(ToNumber(ADD(fromNumber(1), fromNumber(1))()), Is.EqualTo(2));
             Assert.That(ToNumber(ADD(fromNumber(3), fromNumber(4))()), Is.EqualTo(7));
+        }
+
+        [Test]
+        public void TestSub()
+        {
+            Assert.That(ToNumber(SUB(ZERO, ZERO)()), Is.EqualTo(0));
+            Assert.That(ToNumber(SUB(fromNumber(1), ZERO)()), Is.EqualTo(1));
+            Assert.That(ToNumber(SUB(fromNumber(5), fromNumber(2))()), Is.EqualTo(3));
         }
 
         [Test]
