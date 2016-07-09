@@ -13,7 +13,8 @@ namespace FunctionalFizzBuzz
     public class FunctionalFizzBuzz
     {
         static Func<dynamic, dynamic> ID = x => x;
-        static Func<dynamic, Func<dynamic, dynamic>> CONST = c => x => c;
+        static Func<dynamic, Func<dynamic, dynamic>> CONST = c => _ => c;
+        static Func<dynamic, Func<dynamic>> RETURN = r => () => r;
 
         static Func<dynamic, dynamic, dynamic> T = (t, f) => t;
         static Func<dynamic, dynamic, dynamic> F = (t, f) => f;
@@ -25,10 +26,15 @@ namespace FunctionalFizzBuzz
 
         static Func<Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>> NOT = a => IF(a, F, T);
 
-        static Func<dynamic, dynamic, dynamic, dynamic> ZERO = (s, z, i) => z;
-        static Func<dynamic, dynamic, dynamic, Func<dynamic, dynamic, dynamic, dynamic>> SUCC = (s, z, i) => (s2, z2, i2) => i2(s);
+        static Func<dynamic, dynamic, dynamic, dynamic> ZERO = (_1, z, _2) => z;
+        static Func<dynamic, Func<dynamic, dynamic, dynamic, dynamic>> SUCC = s => (_1, _2, i) => i(s);
+
+        static Func<dynamic, dynamic>  PREV = (n) => n(F, F, ID);
+
 
         static Func<dynamic, Func<dynamic, dynamic, dynamic>> IS_ZERO = n => (t, f) => n(f, t, CONST(f));
+
+        static Func<dynamic, dynamic, Func<dynamic>> ADD = (a, b) => () => IF(IS_ZERO(b), RETURN(a), ADD(SUCC(a), PREV(b)))();
 
         // Helpers for tests
 
@@ -44,14 +50,7 @@ namespace FunctionalFizzBuzz
 
         dynamic fromNumber(int n)
         {
-            if (n == 0)
-            {
-                return ZERO;
-            }
-            else
-            {
-                return SUCC(fromNumber(n - 1), false, ID);
-            }
+            return n == 0 ? ZERO : SUCC(fromNumber(n - 1));
         }
 
         private int ToNumber(dynamic n)
@@ -69,23 +68,59 @@ namespace FunctionalFizzBuzz
         // Tests
 
         [Test]
+        public void TestAdd()
+        {
+            Assert.That(ToNumber(ADD(ZERO, ZERO)()), Is.EqualTo(0));
+            Assert.That(ToNumber(ADD(fromNumber(1), ZERO)()), Is.EqualTo(1));
+            Assert.That(ToNumber(ADD(fromNumber(1), fromNumber(1))()), Is.EqualTo(2));
+            Assert.That(ToNumber(ADD(fromNumber(3), fromNumber(4))()), Is.EqualTo(7));
+        }
+
+        [Test]
+        public void Zero()
+        {
+            Assert.That(ToNumber(ZERO), Is.Zero);    
+        }
+
+        [Test]
         public void IsZero()
         {
             Assert.That(ToBool(IS_ZERO(fromNumber(0))), Is.True);
             Assert.That(ToBool(IS_ZERO(fromNumber(1))), Is.False);
             Assert.That(ToBool(IS_ZERO(fromNumber(2))), Is.False);
+
+            Assert.That(ToBool(IF(IS_ZERO(ZERO), T, F)), Is.True);
+            Assert.That(ToBool(IF(IS_ZERO(PREV(fromNumber(1))), T, F)), Is.True);
+            Assert.That(ToBool(IF(IS_ZERO(PREV(fromNumber(2))), T, F)), Is.False);
+        }
+
+        [Test]
+        public void If()
+        {
+            Assert.That(ToBool(IF(T, T, F)), Is.True);
+            Assert.That(ToBool(IF(F, T, F)), Is.False);
+
+            Assert.That(ToNumber(IF(T, fromNumber(1), fromNumber(2))), Is.EqualTo(1));
+            Assert.That(ToNumber(IF(F, fromNumber(1), fromNumber(2))), Is.EqualTo(2));
         }
 
         [Test]
         public void TestNumber()
         {
             Assert.That(ToNumber(ZERO), Is.EqualTo(0));
-            Assert.That(ToNumber(SUCC(ZERO, F, ID)), Is.EqualTo(1));
-            Assert.That(ToNumber(SUCC(SUCC(ZERO, F, ID), F, ID)), Is.EqualTo(2));
-            Assert.That(ToNumber(SUCC(SUCC(SUCC(ZERO, F, ID), F, ID), F, ID)), Is.EqualTo(3));
+            Assert.That(ToNumber(SUCC(ZERO)), Is.EqualTo(1));
+            Assert.That(ToNumber(SUCC(SUCC(ZERO))), Is.EqualTo(2));
+            Assert.That(ToNumber(SUCC(SUCC(SUCC(ZERO)))), Is.EqualTo(3));
 
             Assert.That(ToNumber(fromNumber(0)), Is.EqualTo(0));
             Assert.That(ToNumber(fromNumber(6)), Is.EqualTo(6));
+        }
+
+        [Test]
+        public void Prev()
+        {
+            Assert.That(ToNumber(PREV(fromNumber(1))), Is.EqualTo(0));
+            Assert.That(ToNumber(PREV(fromNumber(2))), Is.EqualTo(1));
         }
 
         [Test]
