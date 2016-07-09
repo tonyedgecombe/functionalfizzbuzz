@@ -56,7 +56,10 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, dynamic> ONE = SUCC(ZERO);
         static Func<dynamic, dynamic, dynamic> TWO = SUCC(ONE);
         static Func<dynamic, dynamic, dynamic> THREE = SUCC(TWO);
+        static Func<dynamic, dynamic, dynamic> FOUR = SUCC(THREE);
         static Func<dynamic, dynamic, dynamic> FIVE = SUCC(SUCC(THREE));
+        static Func<dynamic, dynamic, dynamic> TEN = MUL(TWO, FIVE);
+        static Func<dynamic, dynamic, dynamic> ONE_HUNDRED = MUL(TEN, TEN);
 
         // Helpers for tests
 
@@ -78,7 +81,10 @@ namespace FunctionalFizzBuzz
             Assert.That(ToNumber(ONE), Is.EqualTo(1));    
             Assert.That(ToNumber(TWO), Is.EqualTo(2));    
             Assert.That(ToNumber(THREE), Is.EqualTo(3));    
+            Assert.That(ToNumber(FOUR), Is.EqualTo(4));    
             Assert.That(ToNumber(FIVE), Is.EqualTo(5));    
+            Assert.That(ToNumber(TEN), Is.EqualTo(10));    
+            Assert.That(ToNumber(ONE_HUNDRED), Is.EqualTo(100));    
         }
 
         [Test]
