@@ -27,7 +27,7 @@ namespace FunctionalFizzBuzz
         static Func<Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>> NOT = a => IF(a, F, T);
 
         static Func<dynamic, dynamic, dynamic> ZERO = (z, _) => z;
-        static Func<dynamic, Func<dynamic, dynamic, dynamic>> SUCC = s => (_, i) => i(s);
+        static Func<dynamic, Func<dynamic, dynamic, dynamic>> SUCC = c => (_, i) => i(c);
 
         static Func<dynamic, dynamic>  PREV = (n) => n(F, ID);
 
@@ -35,8 +35,9 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, Func<dynamic, dynamic, dynamic>> IS_ZERO = n => (t, f) => n(t, CONST(f));
 
         static Func<dynamic, dynamic, Func<dynamic>> ADD = (a, b) => () => IF(IS_ZERO(b), RETURN(a), ADD(SUCC(a), PREV(b)))();
-
         static Func<dynamic, dynamic, Func<dynamic>> SUB = (a, b) => () => IF(IS_ZERO(b), RETURN(a), SUB(PREV(a), PREV(b)))();
+
+        static Func<dynamic, dynamic, Func<Func<dynamic, dynamic, dynamic>>> LESS_THAN = (a, b) => () => IF(IS_ZERO(b), RETURN(F), IF(IS_ZERO(a), RETURN(T), LESS_THAN(PREV(a), PREV(b))))();
 
         // Helpers for tests
 
@@ -67,10 +68,17 @@ namespace FunctionalFizzBuzz
             return result;
         }
 
-        // Tests
+        [Test]
+        public void LessThan()
+        {
+            Assert.That(ToBool(LESS_THAN(ZERO, ZERO)()), Is.False);
+            Assert.That(ToBool(LESS_THAN(fromNumber(0), fromNumber(1))()), Is.True);
+            Assert.That(ToBool(LESS_THAN(fromNumber(1), fromNumber(1))()), Is.False);
+            Assert.That(ToBool(LESS_THAN(fromNumber(1), fromNumber(0))()), Is.False);
+        }
 
         [Test]
-        public void TestAdd()
+        public void Add()
         {
             Assert.That(ToNumber(ADD(ZERO, ZERO)()), Is.EqualTo(0));
             Assert.That(ToNumber(ADD(fromNumber(1), ZERO)()), Is.EqualTo(1));
@@ -79,7 +87,7 @@ namespace FunctionalFizzBuzz
         }
 
         [Test]
-        public void TestSub()
+        public void Sub()
         {
             Assert.That(ToNumber(SUB(ZERO, ZERO)()), Is.EqualTo(0));
             Assert.That(ToNumber(SUB(fromNumber(1), ZERO)()), Is.EqualTo(1));
@@ -115,7 +123,7 @@ namespace FunctionalFizzBuzz
         }
 
         [Test]
-        public void TestNumber()
+        public void Number()
         {
             Assert.That(ToNumber(ZERO), Is.EqualTo(0));
             Assert.That(ToNumber(SUCC(ZERO)), Is.EqualTo(1));
@@ -134,14 +142,14 @@ namespace FunctionalFizzBuzz
         }
 
         [Test]
-        public void TestBool()
+        public void Bool()
         {
             Assert.That(ToBool(T), Is.True);
             Assert.That(ToBool(F), Is.False);
         }
 
         [Test]
-        public void TestBinaryOperators()
+        public void BinaryOperators()
         {
             Assert.That(ToBool(AND(FromBool(true), FromBool(true))), Is.True);
             Assert.That(ToBool(AND(FromBool(false), FromBool(true))), Is.False);
