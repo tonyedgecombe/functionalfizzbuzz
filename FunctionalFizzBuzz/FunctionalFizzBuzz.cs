@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 using NUnit.Framework;
 
@@ -99,14 +100,24 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, dynamic> SECOND = (f, s) => s;
 
         static Func<dynamic, dynamic, dynamic, dynamic> END = (e, n, _) => e;
+        static Func<dynamic, Func<dynamic, dynamic, dynamic>> IS_END = n => (t, f) => n(t, t, CONST2(f));
+
         static Func<dynamic, dynamic, Func<dynamic, dynamic, dynamic, dynamic>> CHR = (c, n) => (_1, _2, i) => i(c, n);
 
         static Func<dynamic, dynamic, dynamic, dynamic> FIZZ = CHR(F, CHR(I, CHR(Z, CHR(Z, END))));
         static Func<dynamic, dynamic, dynamic, dynamic> BUZZ = CHR(B, CHR(U, CHR(Z, CHR(Z, END))));
         static Func<dynamic, dynamic, dynamic, dynamic> FIZZBUZZ = CHR(F, CHR(I, CHR(Z, CHR(Z, BUZZ))));
 
+        static Func<dynamic, dynamic, Func<dynamic>> FUNCTOR = (s, a) => () => a(s);
+        static Func<dynamic> NULL_FUNCTION = () => F;
+        static Func<dynamic, dynamic, Func<dynamic>> ACTION2 = (s, a) => () => IF(TRUE, a, a(s));
+
+
+        private static Func<dynamic, dynamic, Func<dynamic>> _PRINT = (s, a) => () => IF(IS_END(s()), NULL_FUNCTION, _PRINT(RETURN(s()(F, F, SECOND)), ACTION2(s(),a())))();
+        static Func<dynamic, dynamic, dynamic> PRINT = (s, a) => _PRINT(RETURN(s), RETURN(a))();
 
         // Helpers for tests
+
         private string ToString(dynamic s)
         {
             StringBuilder sb = new StringBuilder();
@@ -118,14 +129,6 @@ namespace FunctionalFizzBuzz
                 s = s(false, false, SECOND);
             }
             return sb.ToString();
-        }
-
-        [Test]
-        public void String()
-        {
-            Assert.That(ToString(FIZZ), Is.EqualTo("FIZZ"));
-            Assert.That(ToString(BUZZ), Is.EqualTo("BUZZ"));
-            Assert.That(ToString(FIZZBUZZ), Is.EqualTo("FIZZBUZZ"));
         }
 
         private bool ToBool(dynamic f)
@@ -153,6 +156,37 @@ namespace FunctionalFizzBuzz
             }
 
             return result;
+        }
+
+        [Test]
+        public void Print()
+        {
+            var writer = new StringWriter();
+            Func<dynamic, dynamic> wc = c =>
+            {
+                writer.Write((char)ToNumber(c(false, false, FIRST)));
+                return false;
+            };
+
+
+            PRINT(FIZZBUZZ, wc);
+
+            Assert.That(writer.ToString(), Is.EqualTo("FIZZBUZZ"));
+        }
+
+        [Test]
+        public void End()
+        {
+            Assert.That(ToBool(IS_END(END)), Is.True);
+            Assert.That(ToBool(IS_END(FIZZ)), Is.False);
+        }
+
+        [Test]
+        public void String()
+        {
+            Assert.That(ToString(FIZZ), Is.EqualTo("FIZZ"));
+            Assert.That(ToString(BUZZ), Is.EqualTo("BUZZ"));
+            Assert.That(ToString(FIZZBUZZ), Is.EqualTo("FIZZBUZZ"));
         }
 
         [Test]
