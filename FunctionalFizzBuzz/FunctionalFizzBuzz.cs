@@ -31,15 +31,27 @@ namespace FunctionalFizzBuzz
 
         static Func<dynamic, dynamic>  PREV = (n) => n(F, ID);
 
-
         static Func<dynamic, Func<dynamic, dynamic, dynamic>> IS_ZERO = n => (t, f) => n(t, CONST(f));
 
         static Func<dynamic, dynamic, Func<dynamic>> ADD = (a, b) => () => IF(IS_ZERO(b), RETURN(a), ADD(SUCC(a), PREV(b)))();
-        static Func<dynamic, dynamic, Func<dynamic>> SUB = (a, b) => () => IF(IS_ZERO(b), RETURN(a), SUB(PREV(a), PREV(b)))();
+        static Func<dynamic, dynamic, Func<dynamic>> _SUB = (a, b) => () => IF(IS_ZERO(b), RETURN(a), _SUB(PREV(a), PREV(b)))();
+        static Func<dynamic, dynamic, dynamic> SUB = (a, b) => _SUB(a, b)();
 
         static Func<dynamic, dynamic, Func<Func<dynamic, dynamic, dynamic>>> LESS_THAN = (a, b) => () => IF(IS_ZERO(b), RETURN(F), IF(IS_ZERO(a), RETURN(T), LESS_THAN(PREV(a), PREV(b))))();
 
+        static Func<dynamic, dynamic, Func<dynamic>> _MOD = (n, m) => () => IF(LESS_THAN(n(), m())(), RETURN(n()), _MOD(_SUB(n(), m()), m))();
+        static Func<dynamic, dynamic, dynamic> MOD = (n, m) => _MOD(RETURN(n), RETURN(m))();
+
         // Helpers for tests
+
+        [Test]
+        public void Mod()
+        {
+            Assert.That(ToNumber(MOD(fromNumber(4), fromNumber(5))), Is.EqualTo(4));
+            Assert.That(ToNumber(MOD(fromNumber(5), fromNumber(5))), Is.EqualTo(0));
+            Assert.That(ToNumber(MOD(fromNumber(8), fromNumber(5))), Is.EqualTo(3));
+            Assert.That(ToNumber(MOD(fromNumber(13), fromNumber(5))), Is.EqualTo(3));
+        }
 
         private bool ToBool(dynamic f)
         {
@@ -71,11 +83,15 @@ namespace FunctionalFizzBuzz
         [Test]
         public void LessThan()
         {
-            Assert.That(ToBool(LESS_THAN(ZERO, ZERO)()), Is.False);
-            Assert.That(ToBool(LESS_THAN(fromNumber(0), fromNumber(1))()), Is.True);
-            Assert.That(ToBool(LESS_THAN(fromNumber(1), fromNumber(1))()), Is.False);
-            Assert.That(ToBool(LESS_THAN(fromNumber(1), fromNumber(0))()), Is.False);
+            for (int i = 0; i < 10; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    Assert.That(ToBool(LESS_THAN(fromNumber(i), fromNumber(j))()), Is.EqualTo(i < j));
+                }
+            }
         }
+
 
         [Test]
         public void Add()
@@ -89,9 +105,13 @@ namespace FunctionalFizzBuzz
         [Test]
         public void Sub()
         {
-            Assert.That(ToNumber(SUB(ZERO, ZERO)()), Is.EqualTo(0));
-            Assert.That(ToNumber(SUB(fromNumber(1), ZERO)()), Is.EqualTo(1));
-            Assert.That(ToNumber(SUB(fromNumber(5), fromNumber(2))()), Is.EqualTo(3));
+            for (int i = 0; i < 10; i++)
+            {
+                for (int j = i; j < 10; j++)
+                {
+                    Assert.That(ToNumber(SUB(fromNumber(j), fromNumber(i))), Is.EqualTo(j-i));
+                }
+            }
         }
 
         [Test]
