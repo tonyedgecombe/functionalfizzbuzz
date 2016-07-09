@@ -16,20 +16,20 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, Func<dynamic, dynamic>> CONST = c => _ => c;
         static Func<dynamic, Func<dynamic>> RETURN = r => () => r;
 
-        static Func<dynamic, dynamic, dynamic> T = (t, f) => t;
-        static Func<dynamic, dynamic, dynamic> F = (t, f) => f;
+        static Func<dynamic, dynamic, dynamic> TRUE = (t, f) => t;
+        static Func<dynamic, dynamic, dynamic> FALSE = (t, f) => f;
 
         static Func<dynamic, dynamic, dynamic, dynamic> IF = (c, t, e) => c(t, e);
 
-        static Func<Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>> AND = (l, r) => IF(l, r, F);
-        static Func<Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>> OR = (l, r) => IF(l, T, r);
+        static Func<Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>> AND = (l, r) => IF(l, r, FALSE);
+        static Func<Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>> OR = (l, r) => IF(l, TRUE, r);
 
-        static Func<Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>> NOT = a => IF(a, F, T);
+        static Func<Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>> NOT = a => IF(a, FALSE, TRUE);
 
         static Func<dynamic, dynamic, dynamic> ZERO = (z, _) => z;
         static Func<dynamic, Func<dynamic, dynamic, dynamic>> SUCC = c => (_, i) => i(c);
 
-        static Func<dynamic, dynamic>  PREV = (n) => n(F, ID);
+        static Func<dynamic, dynamic>  PREV = (n) => n(FALSE, ID);
 
         static Func<dynamic, Func<dynamic, dynamic, dynamic>> IS_ZERO = n => (t, f) => n(t, CONST(f));
 
@@ -37,13 +37,13 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, Func<dynamic>> _SUB = (a, b) => () => IF(IS_ZERO(b), RETURN(a), _SUB(PREV(a), PREV(b)))();
         static Func<dynamic, dynamic, dynamic> SUB = (a, b) => _SUB(a, b)();
 
-        static Func<dynamic, dynamic, Func<Func<dynamic, dynamic, dynamic>>> LESS_THAN = (a, b) => () => IF(IS_ZERO(b), RETURN(F), IF(IS_ZERO(a), RETURN(T), LESS_THAN(PREV(a), PREV(b))))();
+        static Func<dynamic, dynamic, Func<Func<dynamic, dynamic, dynamic>>> LESS_THAN = (a, b) => () => IF(IS_ZERO(b), RETURN(FALSE), IF(IS_ZERO(a), RETURN(TRUE), LESS_THAN(PREV(a), PREV(b))))();
 
         static Func<dynamic, dynamic, Func<dynamic>> _MOD = (n, m) => () => IF(LESS_THAN(n(), m())(), n, _MOD(_SUB(n(), m()), m))();
         static Func<dynamic, dynamic, dynamic> MOD = (n, m) => _MOD(RETURN(n), RETURN(m))();
 
-        private static Func<dynamic, dynamic> ACTION = a => IF(T, a, a());
-        static Func<dynamic, dynamic, dynamic, Func<dynamic>> _WITH_RANGE = (n, m, a) => () => IF(LESS_THAN(n(), m())(), _WITH_RANGE(RETURN(SUCC(n())), m, ACTION(a)), RETURN(F))();
+        static Func<dynamic, dynamic> ACTION = a => IF(TRUE, a, a());
+        static Func<dynamic, dynamic, dynamic, Func<dynamic>> _WITH_RANGE = (n, m, a) => () => IF(LESS_THAN(n(), m())(), _WITH_RANGE(RETURN(SUCC(n())), m, ACTION(a)), RETURN(FALSE))();
         static Func<dynamic, dynamic, dynamic, dynamic> WITH_RANGE = (n, m, a) => _WITH_RANGE(RETURN(n), RETURN(m), a)();
 
         // Helpers for tests
@@ -72,7 +72,7 @@ namespace FunctionalFizzBuzz
 
         private dynamic FromBool(bool b)
         {
-            return b ? T : F;
+            return b ? TRUE : FALSE;
         }
 
         dynamic fromNumber(int n)
@@ -139,19 +139,19 @@ namespace FunctionalFizzBuzz
             Assert.That(ToBool(IS_ZERO(fromNumber(1))), Is.False);
             Assert.That(ToBool(IS_ZERO(fromNumber(2))), Is.False);
 
-            Assert.That(ToBool(IF(IS_ZERO(ZERO), T, F)), Is.True);
-            Assert.That(ToBool(IF(IS_ZERO(PREV(fromNumber(1))), T, F)), Is.True);
-            Assert.That(ToBool(IF(IS_ZERO(PREV(fromNumber(2))), T, F)), Is.False);
+            Assert.That(ToBool(IF(IS_ZERO(ZERO), TRUE, FALSE)), Is.True);
+            Assert.That(ToBool(IF(IS_ZERO(PREV(fromNumber(1))), TRUE, FALSE)), Is.True);
+            Assert.That(ToBool(IF(IS_ZERO(PREV(fromNumber(2))), TRUE, FALSE)), Is.False);
         }
 
         [Test]
         public void If()
         {
-            Assert.That(ToBool(IF(T, T, F)), Is.True);
-            Assert.That(ToBool(IF(F, T, F)), Is.False);
+            Assert.That(ToBool(IF(TRUE, TRUE, FALSE)), Is.True);
+            Assert.That(ToBool(IF(FALSE, TRUE, FALSE)), Is.False);
 
-            Assert.That(ToNumber(IF(T, fromNumber(1), fromNumber(2))), Is.EqualTo(1));
-            Assert.That(ToNumber(IF(F, fromNumber(1), fromNumber(2))), Is.EqualTo(2));
+            Assert.That(ToNumber(IF(TRUE, fromNumber(1), fromNumber(2))), Is.EqualTo(1));
+            Assert.That(ToNumber(IF(FALSE, fromNumber(1), fromNumber(2))), Is.EqualTo(2));
         }
 
         [Test]
@@ -176,8 +176,8 @@ namespace FunctionalFizzBuzz
         [Test]
         public void Bool()
         {
-            Assert.That(ToBool(T), Is.True);
-            Assert.That(ToBool(F), Is.False);
+            Assert.That(ToBool(TRUE), Is.True);
+            Assert.That(ToBool(FALSE), Is.False);
         }
 
         [Test]
@@ -193,8 +193,8 @@ namespace FunctionalFizzBuzz
             Assert.That(ToBool(OR(FromBool(true), FromBool(false))), Is.True);
             Assert.That(ToBool(OR(FromBool(false), FromBool(false))), Is.False);
 
-            Assert.That(ToBool(NOT(T)), Is.False);
-            Assert.That(ToBool(NOT(F)), Is.True);
+            Assert.That(ToBool(NOT(TRUE)), Is.False);
+            Assert.That(ToBool(NOT(FALSE)), Is.True);
         }
     }
 }
