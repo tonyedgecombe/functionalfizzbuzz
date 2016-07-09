@@ -39,6 +39,9 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, Func<dynamic>> _SUB = (a, b) => () => IF(IS_ZERO(b), RETURN(a), _SUB(PREV(a), PREV(b)))();
         static Func<dynamic, dynamic, dynamic> SUB = (a, b) => _SUB(a, b)();
 
+        private static Func<dynamic, dynamic, dynamic, Func<dynamic>> _MUL = (a, b, t) => () => IF(IS_ZERO(a), RETURN(t), _MUL(PREV(a), b, ADD(b,t)))();
+        static Func<dynamic, dynamic, dynamic> MUL = (a, b) => _MUL(a, b, ZERO)();
+
         static Func<dynamic, dynamic, Func<Func<dynamic, dynamic, dynamic>>> _LESS_THAN = (a, b) => () => IF(IS_ZERO(b), RETURN(FALSE), IF(IS_ZERO(a), RETURN(TRUE), _LESS_THAN(PREV(a), PREV(b))))();
         static Func<dynamic, dynamic, dynamic> LESS_THAN = (a, b) => _LESS_THAN(a, b)();
 
@@ -56,6 +59,18 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, dynamic> FIVE = SUCC(SUCC(THREE));
 
         // Helpers for tests
+
+        [Test]
+        public void Mul()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    Assert.That(ToNumber(MUL(fromNumber(i), fromNumber(j))), Is.EqualTo(i*j));
+                }
+            }
+        }
 
         [Test]
         public void Constants()
