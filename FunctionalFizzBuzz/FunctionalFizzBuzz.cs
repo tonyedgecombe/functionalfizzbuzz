@@ -137,6 +137,11 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic> DIVISIBLE_BY_FIVE = (a) => IS_ZERO(MOD(a, FIVE));
         static Func<dynamic, dynamic> DIVISIBLE_BY_FIFTEEN= (a) => IS_ZERO(MOD(a, FIFTEEN));
 
+        static Func<dynamic, dynamic> LINE =
+            n =>
+                IF(DIVISIBLE_BY_FIFTEEN(n), FIZZBUZZ,
+                    IF(DIVISIBLE_BY_THREE(n), FIZZ, IF(DIVISIBLE_BY_FIVE(n), BUZZ, NUMTOSTR(n))));
+
         // Helpers for tests
 
         private string ToString(dynamic s)
@@ -177,6 +182,20 @@ namespace FunctionalFizzBuzz
             }
 
             return result;
+        }
+
+        [Test]
+        public void Line()
+        {
+            Assert.That(ToString(LINE(ONE)), Is.EqualTo("1"));    
+            Assert.That(ToString(LINE(TWO)), Is.EqualTo("2"));    
+            Assert.That(ToString(LINE(THREE)), Is.EqualTo("FIZZ"));    
+            Assert.That(ToString(LINE(FOUR)), Is.EqualTo("4"));    
+            Assert.That(ToString(LINE(FIVE)), Is.EqualTo("BUZZ"));    
+            Assert.That(ToString(LINE(SIX)), Is.EqualTo("FIZZ"));    
+            Assert.That(ToString(LINE(TEN)), Is.EqualTo("BUZZ"));    
+            Assert.That(ToString(LINE(FIFTEEN)), Is.EqualTo("FIZZBUZZ"));    
+            Assert.That(ToString(LINE(SIXTEEN)), Is.EqualTo("16"));    
         }
 
         [Test]
