@@ -70,6 +70,8 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, dynamic> SEVEN = SUCC(SIX);
         static Func<dynamic, dynamic, dynamic> EIGHT = SUCC(SEVEN);
         static Func<dynamic, dynamic, dynamic> TEN = MUL(TWO, FIVE);
+        static Func<dynamic, dynamic, dynamic> THIRTEEN = ADD(EIGHT, FIVE);
+        static Func<dynamic, dynamic, dynamic> FIFTEEN = MUL(THREE, FIVE);
         static Func<dynamic, dynamic, dynamic> SIXTEEN = MUL(TWO, EIGHT);
         static Func<dynamic, dynamic, dynamic> FORTY_EIGHT = MUL(SIXTEEN, THREE);
         static Func<dynamic, dynamic, dynamic> SIXTY_FOUR = MUL(EIGHT, EIGHT);
@@ -118,6 +120,8 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, dynamic, dynamic> BUZZ = CHR(B, CHR(U, CHR(Z, CHR(Z, END))));
         static Func<dynamic, dynamic, dynamic, dynamic> FIZZBUZZ = JOIN(FIZZ, BUZZ);
 
+        static Func<dynamic, dynamic, dynamic, dynamic> CRLF = CHR(THIRTEEN, CHR(TEN, END));
+
         static Func<dynamic> NULL_FUNCTION = () => F;
         static Func<dynamic, dynamic, Func<dynamic>> ACTION2 = (s, a) => () => IF(TRUE, a, a(s));
 
@@ -128,15 +132,6 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, Func<dynamic>> _NUMTOSTR = n => () => IF(LESS_THAN(n(), TEN), RE(CHR(ADD(FORTY_EIGHT, n()), END)), _JOIN(_NUMTOSTR(RE(DIV(n(), TEN))), _NUMTOSTR(RE(MOD(n(), TEN)))))();
         static Func<dynamic, dynamic> NUMTOSTR = n => _NUMTOSTR(RE(n))();
 
-
-        [Test]
-        public void NumToStr()
-        {
-            Assert.That(ToString(NUMTOSTR(fromNumber(0))), Is.EqualTo("0"));
-            Assert.That(ToString(NUMTOSTR(fromNumber(9))), Is.EqualTo("9"));
-            Assert.That(ToString(NUMTOSTR(fromNumber(10))), Is.EqualTo("10"));
-            Assert.That(ToString(NUMTOSTR(fromNumber(123))), Is.EqualTo("123"));
-        }
 
         // Helpers for tests
 
@@ -178,6 +173,15 @@ namespace FunctionalFizzBuzz
             }
 
             return result;
+        }
+
+        [Test]
+        public void NumToStr()
+        {
+            Assert.That(ToString(NUMTOSTR(fromNumber(0))), Is.EqualTo("0"));
+            Assert.That(ToString(NUMTOSTR(fromNumber(9))), Is.EqualTo("9"));
+            Assert.That(ToString(NUMTOSTR(fromNumber(10))), Is.EqualTo("10"));
+            Assert.That(ToString(NUMTOSTR(fromNumber(123))), Is.EqualTo("123"));
         }
 
         [Test]
@@ -241,6 +245,8 @@ namespace FunctionalFizzBuzz
             Assert.That(ToNumber(SEVEN), Is.EqualTo(7));    
             Assert.That(ToNumber(EIGHT), Is.EqualTo(8));    
             Assert.That(ToNumber(TEN), Is.EqualTo(10));    
+            Assert.That(ToNumber(THIRTEEN), Is.EqualTo(13));    
+            Assert.That(ToNumber(FIFTEEN), Is.EqualTo(15));    
             Assert.That(ToNumber(SIXTEEN), Is.EqualTo(16));    
             Assert.That(ToNumber(FORTY_EIGHT), Is.EqualTo(48));    
             Assert.That(ToNumber(ONE_HUNDRED), Is.EqualTo(100));    
