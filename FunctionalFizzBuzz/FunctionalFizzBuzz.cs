@@ -132,6 +132,7 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, Func<dynamic>> _NUMTOSTR = n => () => IF(LESS_THAN(n(), TEN), RE(CHR(ADD(FORTY_EIGHT, n()), END)), _JOIN(_NUMTOSTR(RE(DIV(n(), TEN))), _NUMTOSTR(RE(MOD(n(), TEN)))))();
         static Func<dynamic, dynamic> NUMTOSTR = n => _NUMTOSTR(RE(n))();
 
+        static Func<dynamic, dynamic, dynamic> DIVISIBLE_BY = (a, b) => IS_ZERO(MOD(a, b));
 
         // Helpers for tests
 
@@ -173,6 +174,15 @@ namespace FunctionalFizzBuzz
             }
 
             return result;
+        }
+
+        [Test]
+        public void DivisibleBy()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                Assert.That(ToBool(DIVISIBLE_BY(fromNumber(i), THREE)), Is.EqualTo(i % 3 == 0));
+            }
         }
 
         [Test]
