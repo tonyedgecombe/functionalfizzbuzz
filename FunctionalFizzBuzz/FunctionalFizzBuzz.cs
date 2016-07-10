@@ -125,6 +125,18 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, Func<dynamic>> _PRINT = (s, a) => () => IF(IS_END(s()), NULL_FUNCTION, _PRINT(RETURN(s()(F, F, SECOND)), ACTION2(s(),a())))();
         static Func<dynamic, dynamic, dynamic> PRINT = (s, a) => _PRINT(RETURN(s), RETURN(a))();
 
+        static Func<dynamic, Func<dynamic>> _NUMTOSTR = n => () => IF(LESS_THAN(n(), TEN), RETURN(CHR(ADD(FORTY_EIGHT, n()), END)), _JOIN(_NUMTOSTR(RETURN(DIV(n(), TEN))), _NUMTOSTR(RETURN(MOD(n(), TEN)))))();
+        static Func<dynamic, dynamic> NUMTOSTR = n => _NUMTOSTR(RETURN(n))();
+
+
+        [Test]
+        public void NumToStr()
+        {
+            Assert.That(ToString(NUMTOSTR(fromNumber(0))), Is.EqualTo("0"));
+            Assert.That(ToString(NUMTOSTR(fromNumber(9))), Is.EqualTo("9"));
+            Assert.That(ToString(NUMTOSTR(fromNumber(10))), Is.EqualTo("10"));
+            Assert.That(ToString(NUMTOSTR(fromNumber(123))), Is.EqualTo("123"));
+        }
 
         // Helpers for tests
 
