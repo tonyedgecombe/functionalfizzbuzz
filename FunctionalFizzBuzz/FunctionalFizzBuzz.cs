@@ -133,6 +133,9 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic> NUMTOSTR = n => _NUMTOSTR(RE(n))();
 
         static Func<dynamic, dynamic, dynamic> DIVISIBLE_BY = (a, b) => IS_ZERO(MOD(a, b));
+        static Func<dynamic, dynamic> DIVISIBLE_BY_THREE = (a) => IS_ZERO(MOD(a, THREE));
+        static Func<dynamic, dynamic> DIVISIBLE_BY_FIVE = (a) => IS_ZERO(MOD(a, FIVE));
+        static Func<dynamic, dynamic> DIVISIBLE_BY_FIFTEEN= (a) => IS_ZERO(MOD(a, FIFTEEN));
 
         // Helpers for tests
 
@@ -179,9 +182,12 @@ namespace FunctionalFizzBuzz
         [Test]
         public void DivisibleBy()
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 1; i <= 100; i++)
             {
                 Assert.That(ToBool(DIVISIBLE_BY(fromNumber(i), THREE)), Is.EqualTo(i % 3 == 0));
+                Assert.That(ToBool(DIVISIBLE_BY_THREE(fromNumber(i))), Is.EqualTo(i % 3 == 0));
+                Assert.That(ToBool(DIVISIBLE_BY_FIVE(fromNumber(i))), Is.EqualTo(i % 5 == 0));
+                Assert.That(ToBool(DIVISIBLE_BY_FIFTEEN(fromNumber(i))), Is.EqualTo(i % 15 == 0));
             }
         }
 
