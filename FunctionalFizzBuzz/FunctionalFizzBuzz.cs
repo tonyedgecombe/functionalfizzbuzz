@@ -34,7 +34,7 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, dynamic> ZERO = (z, _) => z;
         static Func<dynamic, Func<dynamic, dynamic, dynamic>> SUCC = c => (_, i) => i(c);
 
-        static Func<dynamic, dynamic>  PREV = (n) => n(FALSE, ID);
+        static Func<dynamic, dynamic> PREV = (n) => IF(IS_ZERO(n), ZERO, n(FALSE, ID));
 
         static Func<dynamic, Func<dynamic, dynamic, dynamic>> IS_ZERO = n => (t, f) => n(t, CONST(f));
 
@@ -49,6 +49,9 @@ namespace FunctionalFizzBuzz
 
         static Func<dynamic, dynamic, Func<Func<dynamic, dynamic, dynamic>>> _LESS_THAN = (a, b) => () => IF(IS_ZERO(b), RETURN(FALSE), IF(IS_ZERO(a), RETURN(TRUE), _LESS_THAN(PREV(a), PREV(b))))();
         static Func<dynamic, dynamic, dynamic> LESS_THAN = (a, b) => _LESS_THAN(a, b)();
+
+        static Func<dynamic, dynamic, dynamic, Func<dynamic>> _DIV = (a, b, t) => () => IF(LESS_THAN(a(), b()), t, _DIV(_SUB(a(), b()), b, RETURN(SUCC(t()))))();
+        static Func<dynamic, dynamic, dynamic> DIV = (a, b) => _DIV(RETURN(a), RETURN(b), RETURN(ZERO))();
 
         static Func<dynamic, dynamic, Func<dynamic>> _MOD = (n, m) => () => IF(LESS_THAN(n(), m()), n, _MOD(_SUB(n(), m()), m))();
         static Func<dynamic, dynamic, dynamic> MOD = (n, m) => _MOD(RETURN(n), RETURN(m))();
@@ -122,6 +125,7 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, Func<dynamic>> _PRINT = (s, a) => () => IF(IS_END(s()), NULL_FUNCTION, _PRINT(RETURN(s()(F, F, SECOND)), ACTION2(s(),a())))();
         static Func<dynamic, dynamic, dynamic> PRINT = (s, a) => _PRINT(RETURN(s), RETURN(a))();
 
+
         // Helpers for tests
 
         private string ToString(dynamic s)
@@ -162,6 +166,18 @@ namespace FunctionalFizzBuzz
             }
 
             return result;
+        }
+
+        [Test]
+        public void Div()
+        {
+            for (int i = 1; i < 10; i++)
+            {
+                for (int j = 1; j < 11; j++)
+                {
+                    Assert.That(ToNumber(DIV(fromNumber(i), fromNumber(j))), Is.EqualTo(i/j));
+                }
+            }
         }
 
         [Test]
@@ -325,6 +341,7 @@ namespace FunctionalFizzBuzz
         [Test]
         public void Prev()
         {
+            Assert.That(ToNumber(PREV(fromNumber(0))), Is.EqualTo(0));
             Assert.That(ToNumber(PREV(fromNumber(1))), Is.EqualTo(0));
             Assert.That(ToNumber(PREV(fromNumber(2))), Is.EqualTo(1));
         }
