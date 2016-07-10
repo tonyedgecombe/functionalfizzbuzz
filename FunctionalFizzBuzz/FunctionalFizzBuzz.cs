@@ -116,9 +116,9 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, Func<dynamic>> _JOIN = (l, r) => () => CHR(l()(_I, _I, FIRST), IF(IS_END(l()(_I, _I, SECOND)), r, _JOIN(RE(l()(_I, _I, SECOND)), r))());
         static Func<dynamic, dynamic, dynamic> JOIN = (l, r) => _JOIN(RE(l), RE(r))();
 
-        static Func<dynamic, dynamic, dynamic, dynamic> FIZZ = CHR(F, CHR(I, CHR(Z, CHR(Z, END))));
-        static Func<dynamic, dynamic, dynamic, dynamic> BUZZ = CHR(B, CHR(U, CHR(Z, CHR(Z, END))));
-        static Func<dynamic, dynamic, dynamic, dynamic> FIZZBUZZ = JOIN(FIZZ, BUZZ);
+        static Func<dynamic, dynamic, dynamic, dynamic> FIZZ_STR = CHR(F, CHR(I, CHR(Z, CHR(Z, END))));
+        static Func<dynamic, dynamic, dynamic, dynamic> BUZZ_STR = CHR(B, CHR(U, CHR(Z, CHR(Z, END))));
+        static Func<dynamic, dynamic, dynamic, dynamic> FIZZBUZZ_STR = JOIN(FIZZ_STR, BUZZ_STR);
 
         static Func<dynamic, dynamic, dynamic, dynamic> CRLF = CHR(THIRTEEN, CHR(TEN, END));
 
@@ -139,8 +139,13 @@ namespace FunctionalFizzBuzz
 
         static Func<dynamic, dynamic> LINE =
             n =>
-                IF(DIVISIBLE_BY_FIFTEEN(n), FIZZBUZZ,
-                    IF(DIVISIBLE_BY_THREE(n), FIZZ, IF(DIVISIBLE_BY_FIVE(n), BUZZ, NUMTOSTR(n))));
+                IF(DIVISIBLE_BY_FIFTEEN(n), FIZZBUZZ_STR,
+                    IF(DIVISIBLE_BY_THREE(n), FIZZ_STR, IF(DIVISIBLE_BY_FIVE(n), BUZZ_STR, NUMTOSTR(n))));
+
+        static Func<dynamic, dynamic> LINE_WITH_CRLF = (n) => JOIN(LINE(n), CRLF);
+
+        static Func<dynamic, dynamic, dynamic, Func<dynamic>> _FIZZ_BUZZ = (s, e, o) => () => IF(LESS_THAN(s, e), _FIZZ_BUZZ(SUCC(s), e, o), RE(PRINT(LINE_WITH_CRLF(s), o)))();
+        static Func<dynamic, dynamic> FIZZ_BUZZ = o => _FIZZ_BUZZ(ONE, ONE_HUNDRED, o)();
 
         // Helpers for tests
 
@@ -172,7 +177,7 @@ namespace FunctionalFizzBuzz
             return n == 0 ? ZERO : SUCC(fromNumber(n - 1));
         }
 
-        private int ToNumber(dynamic n)
+        private static int ToNumber(dynamic n)
         {
             var result = 0;
             while (!n(true, CONST(false)))
@@ -248,7 +253,7 @@ namespace FunctionalFizzBuzz
             };
 
 
-            PRINT(FIZZBUZZ, wc);
+            PRINT(FIZZBUZZ_STR, wc);
 
             Assert.That(writer.ToString(), Is.EqualTo("FIZZBUZZ"));
         }
@@ -257,15 +262,15 @@ namespace FunctionalFizzBuzz
         public void End()
         {
             Assert.That(ToBool(IS_END(END)), Is.True);
-            Assert.That(ToBool(IS_END(FIZZ)), Is.False);
+            Assert.That(ToBool(IS_END(FIZZ_STR)), Is.False);
         }
 
         [Test]
         public void String()
         {
-            Assert.That(ToString(FIZZ), Is.EqualTo("FIZZ"));
-            Assert.That(ToString(BUZZ), Is.EqualTo("BUZZ"));
-            Assert.That(ToString(FIZZBUZZ), Is.EqualTo("FIZZBUZZ"));
+            Assert.That(ToString(FIZZ_STR), Is.EqualTo("FIZZ"));
+            Assert.That(ToString(BUZZ_STR), Is.EqualTo("BUZZ"));
+            Assert.That(ToString(FIZZBUZZ_STR), Is.EqualTo("FIZZBUZZ"));
         }
 
         [Test]
@@ -421,6 +426,17 @@ namespace FunctionalFizzBuzz
 
             Assert.That(ToBool(NOT(TRUE)), Is.False);
             Assert.That(ToBool(NOT(FALSE)), Is.True);
+        }
+
+        public static void Main()
+        {
+            Func<dynamic, dynamic> consoleWriter = c =>
+            {
+                Console.Write((char)ToNumber(c(false, false, FIRST)));
+                return false;
+            };
+
+            FIZZ_BUZZ(consoleWriter);
         }
     }
 }
