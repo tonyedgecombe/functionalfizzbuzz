@@ -29,7 +29,7 @@ namespace FunctionalFizzBuzz
         static Func<dynamic, dynamic, dynamic> AND = (l, r) => IF(l, r, FALSE);
         static Func<dynamic, dynamic, dynamic> OR = (l, r) => IF(l, TRUE, r);
 
-        static Func<Func<dynamic, dynamic, dynamic>, Func<dynamic, dynamic, dynamic>> NOT = a => IF(a, FALSE, TRUE);
+        static Func<dynamic, dynamic> NOT = a => IF(a, FALSE, TRUE);
 
         static Func<dynamic, dynamic, dynamic> ZERO = (z, _) => z;
         static Func<dynamic, Func<dynamic, dynamic, dynamic>> SUCC = c => (_, i) => i(c);
