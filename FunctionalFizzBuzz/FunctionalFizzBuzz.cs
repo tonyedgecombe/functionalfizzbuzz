@@ -144,20 +144,15 @@ namespace FunctionalFizzBuzz
         public static Func<dynamic, dynamic, dynamic, Func<dynamic>> _FIZZ_BUZZ = (s, e, o) => () => IF(LESS_THAN(s, e), _FIZZ_BUZZ(SUCC(s), e, o), RE(PRINT(LINE_WITH_CRLF(s), o)))();
         public static Func<dynamic, dynamic> FIZZ_BUZZ = o => _FIZZ_BUZZ(ONE, ONE_HUNDRED, o)();
 
+        // Helper to extract integer from encoding
         public static int ToNumber(dynamic n)
         {
-            var result = 0;
-            while (!n(true, CONST(false)))
-            {
-                n = n(false, ID);
-                result++;
-            }
-
-            return result;
+            return n(true, CONST(false)) ? 0 : ToNumber(n(false, ID)) + 1;
         }
 
         public static void Main()
         {
+            // Pass in a simple function that writes ASCII characters to the console
             Func<dynamic, dynamic> consoleWriter = c =>
             {
                 Console.Write((char) ToNumber(c(false, false, FIRST)));
