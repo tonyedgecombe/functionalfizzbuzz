@@ -1,4 +1,5 @@
 ﻿using System;
+
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
@@ -35,26 +36,51 @@ namespace FunctionalFizzBuzz
 
         public static Func<dynamic, Func<dynamic, dynamic, dynamic>> IS_ZERO = n => (t, f) => n(t, CONST(f));
 
-        public static Func<dynamic, dynamic, Func<dynamic>> _ADD = (a, b) => () => IF(IS_ZERO(b), RE(a), _ADD(SUCC(a), PREV(b)))();
+        public static Func<dynamic, dynamic, Func<dynamic>> _ADD =
+            (a, b) => () => IF(IS_ZERO(b), RE(a), _ADD(SUCC(a), PREV(b)))();
+
         public static Func<dynamic, dynamic, dynamic> ADD = (a, b) => _ADD(a, b)();
 
-        public static Func<dynamic, dynamic, Func<dynamic>> _SUB = (a, b) => () => IF(IS_ZERO(b), RE(a), _SUB(PREV(a), PREV(b)))();
+        public static Func<dynamic, dynamic, Func<dynamic>> _SUB =
+            (a, b) => () => IF(IS_ZERO(b), RE(a), _SUB(PREV(a), PREV(b)))();
+
         public static Func<dynamic, dynamic, dynamic> SUB = (a, b) => _SUB(a, b)();
 
-        public static Func<dynamic, dynamic, dynamic, Func<dynamic>> _MUL = (a, b, t) => () => IF(IS_ZERO(a), RE(t), _MUL(PREV(a), b, ADD(b,t)))();
+        public static Func<dynamic, dynamic, dynamic, Func<dynamic>> _MUL =
+            (a, b, t) => () => IF(IS_ZERO(a), RE(t), _MUL(PREV(a), b, ADD(b, t)))();
+
         public static Func<dynamic, dynamic, dynamic> MUL = (a, b) => _MUL(a, b, ZERO)();
 
-        public static Func<dynamic, dynamic, Func<Func<dynamic, dynamic, dynamic>>> _LESS_THAN = (a, b) => () => IF(IS_ZERO(b), RE(FALSE), IF(IS_ZERO(a), RE(TRUE), _LESS_THAN(PREV(a), PREV(b))))();
+        public static Func<dynamic, dynamic, Func<Func<dynamic, dynamic, dynamic>>> _LESS_THAN =
+            (a, b) => () => IF(IS_ZERO(b), 
+                                RE(FALSE), 
+                                IF(IS_ZERO(a), 
+                                    RE(TRUE), 
+                                    _LESS_THAN(PREV(a), PREV(b))))();
+
         public static Func<dynamic, dynamic, dynamic> LESS_THAN = (a, b) => _LESS_THAN(a, b)();
 
-        public static Func<dynamic, dynamic, dynamic, Func<dynamic>> _DIV = (a, b, t) => () => IF(LESS_THAN(a(), b()), t, _DIV(_SUB(a(), b()), b, RE(SUCC(t()))))();
+        public static Func<dynamic, dynamic, dynamic, Func<dynamic>> _DIV =
+            (a, b, t) => () => IF(LESS_THAN(a(), b()), 
+                                   t, 
+                                   _DIV(_SUB(a(), b()), b, RE(SUCC(t()))))();
+
         public static Func<dynamic, dynamic, dynamic> DIV = (a, b) => _DIV(RE(a), RE(b), RE(ZERO))();
 
-        public static Func<dynamic, dynamic, Func<dynamic>> _MOD = (n, m) => () => IF(LESS_THAN(n(), m()), n, _MOD(_SUB(n(), m()), m))();
+        public static Func<dynamic, dynamic, Func<dynamic>> _MOD =
+            (n, m) => () => IF(LESS_THAN(n(), m()), 
+                                n, 
+                                _MOD(_SUB(n(), m()), m))();
+
         public static Func<dynamic, dynamic, dynamic> MOD = (n, m) => _MOD(RE(n), RE(m))();
 
         public static Func<dynamic, dynamic> ACTION = a => IF(TRUE, a, a());
-        public static Func<dynamic, dynamic, dynamic, Func<dynamic>> _WITH_RANGE = (n, m, a) => () => IF(LESS_THAN(n(), m()), _WITH_RANGE(RE(SUCC(n())), m, ACTION(a)), RE(FALSE))();
+
+        public static Func<dynamic, dynamic, dynamic, Func<dynamic>> _WITH_RANGE =
+            (n, m, a) => () => IF(LESS_THAN(n(), m()), 
+                                _WITH_RANGE(RE(SUCC(n())), m, ACTION(a)), 
+                                RE(FALSE))();
+
         public static Func<dynamic, dynamic, dynamic, dynamic> WITH_RANGE = (n, m, a) => _WITH_RANGE(RE(n), RE(m), a)();
 
         // Some constants
@@ -108,9 +134,14 @@ namespace FunctionalFizzBuzz
         public static Func<dynamic, dynamic, dynamic, dynamic> END = (e, n, _) => e;
         public static Func<dynamic, Func<dynamic, dynamic, dynamic>> IS_END = n => (t, f) => n(t, t, CONST2(f));
 
-        public static Func<dynamic, dynamic, Func<dynamic, dynamic, dynamic, dynamic>> CHR = (c, n) => (_1, _2, i) => i(c, n);
+        public static Func<dynamic, dynamic, Func<dynamic, dynamic, dynamic, dynamic>> CHR =
+            (c, n) => (_1, _2, i) => i(c, n);
 
-        public static Func<dynamic, dynamic, Func<dynamic>> _JOIN = (l, r) => () => CHR(l()(_I, _I, FIRST), IF(IS_END(l()(_I, _I, SECOND)), r, _JOIN(RE(l()(_I, _I, SECOND)), r))());
+        public static Func<dynamic, dynamic, Func<dynamic>> _JOIN = (l, r) =>
+                () => CHR(l()(_I, _I, FIRST), IF(IS_END(l()(_I, _I, SECOND)), 
+                                                    r, 
+                                                    _JOIN(RE(l()(_I, _I, SECOND)), r))());
+
         public static Func<dynamic, dynamic, dynamic> JOIN = (l, r) => _JOIN(RE(l), RE(r))();
 
         public static Func<dynamic, dynamic, dynamic, dynamic> FIZZ_STR = CHR(F, CHR(I, CHR(Z, CHR(Z, END))));
@@ -123,25 +154,44 @@ namespace FunctionalFizzBuzz
         public static Func<dynamic, dynamic, Func<dynamic>> ACTION2 = (s, a) => () => IF(TRUE, a, a(s));
 
 
-        public static Func<dynamic, dynamic, Func<dynamic>> _PRINT = (s, a) => () => IF(IS_END(s()), NULL_FUNCTION, _PRINT(RE(s()(F, F, SECOND)), ACTION2(s(),a())))();
+        public static Func<dynamic, dynamic, Func<dynamic>> _PRINT =
+            (s, a) => () => IF(IS_END(s()), 
+                                NULL_FUNCTION, 
+                                _PRINT(RE(s()(F, F, SECOND)), ACTION2(s(), a())))();
+
         public static Func<dynamic, dynamic, dynamic> PRINT = (s, a) => _PRINT(RE(s), RE(a))();
 
-        public static Func<dynamic, Func<dynamic>> _NUMTOSTR = n => () => IF(LESS_THAN(n(), TEN), RE(CHR(ADD(FORTY_EIGHT, n()), END)), _JOIN(_NUMTOSTR(RE(DIV(n(), TEN))), _NUMTOSTR(RE(MOD(n(), TEN)))))();
+        public static Func<dynamic, Func<dynamic>> _NUMTOSTR =
+            n =>
+                () =>
+                    IF(LESS_THAN(n(), TEN), 
+                        RE(CHR(ADD(FORTY_EIGHT, n()), END)),
+                        _JOIN(_NUMTOSTR(RE(DIV(n(), TEN))), _NUMTOSTR(RE(MOD(n(), TEN)))))();
+
         public static Func<dynamic, dynamic> NUMTOSTR = n => _NUMTOSTR(RE(n))();
 
         public static Func<dynamic, dynamic, dynamic> DIVISIBLE_BY = (a, b) => IS_ZERO(MOD(a, b));
         public static Func<dynamic, dynamic> DIVISIBLE_BY_THREE = (a) => IS_ZERO(MOD(a, THREE));
         public static Func<dynamic, dynamic> DIVISIBLE_BY_FIVE = (a) => IS_ZERO(MOD(a, FIVE));
-        public static Func<dynamic, dynamic> DIVISIBLE_BY_FIFTEEN= (a) => IS_ZERO(MOD(a, FIFTEEN));
+        public static Func<dynamic, dynamic> DIVISIBLE_BY_FIFTEEN = (a) => IS_ZERO(MOD(a, FIFTEEN));
 
         public static Func<dynamic, dynamic> LINE =
             n =>
-                IF(DIVISIBLE_BY_FIFTEEN(n), FIZZBUZZ_STR,
-                    IF(DIVISIBLE_BY_THREE(n), FIZZ_STR, IF(DIVISIBLE_BY_FIVE(n), BUZZ_STR, NUMTOSTR(n))));
+                IF(DIVISIBLE_BY_FIFTEEN(n), 
+                    FIZZBUZZ_STR,
+                    IF(DIVISIBLE_BY_THREE(n), 
+                        FIZZ_STR, 
+                        IF(DIVISIBLE_BY_FIVE(n), 
+                            BUZZ_STR, 
+                            NUMTOSTR(n))));
 
         public static Func<dynamic, dynamic> LINE_WITH_CRLF = (n) => JOIN(LINE(n), CRLF);
 
-        public static Func<dynamic, dynamic, dynamic, Func<dynamic>> _FIZZ_BUZZ = (s, e, o) => () => IF(LESS_THAN(s, e), _FIZZ_BUZZ(SUCC(s), e, o), RE(PRINT(LINE_WITH_CRLF(s), o)))();
+        public static Func<dynamic, dynamic, dynamic, Func<dynamic>> _FIZZ_BUZZ =
+            (s, e, o) => () => IF(LESS_THAN(s, e), 
+                                    _FIZZ_BUZZ(SUCC(s), e, o), 
+                                    RE(PRINT(LINE_WITH_CRLF(s), o)))();
+
         public static Func<dynamic, dynamic> FIZZ_BUZZ = o => _FIZZ_BUZZ(ONE, ONE_HUNDRED, o)();
 
         // Helper to extract integer from encoding
