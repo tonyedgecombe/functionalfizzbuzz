@@ -150,7 +150,7 @@ namespace FunctionalFizzBuzz
 
         public static Func<dynamic, dynamic, dynamic, dynamic> CRLF = CHR(THIRTEEN, CHR(TEN, END));
 
-        public static Func<dynamic> NULL_FUNCTION = () => F;
+        public static Func<dynamic> NULL_FUNCTION = () => NULL_FUNCTION;
         public static Func<dynamic, dynamic, Func<dynamic>> ACTION2 = (s, a) => () => IF(TRUE, a, a(s));
 
 
