@@ -23,9 +23,11 @@ namespace FunctionalFizzBuzz
         // Use _I for parameteres to ignore
         public static Func<dynamic> _I = () => F;
 
+        // bool values have to have the same signature but differ in their application
         public static Func<dynamic, dynamic, dynamic> TRUE = (t, f) => t;
         public static Func<dynamic, dynamic, dynamic> FALSE = (t, f) => f;
 
+        // A few operators give us binary and hence a working computer
         public static Func<dynamic, dynamic, dynamic, dynamic> IF = (c, t, e) => c(t, e);
 
         public static Func<dynamic, dynamic, dynamic> AND = (l, r) => IF(l, r, FALSE);
@@ -33,13 +35,31 @@ namespace FunctionalFizzBuzz
 
         public static Func<dynamic, dynamic> NOT = a => IF(a, FALSE, TRUE);
 
+        // Numbers are sets, where each element is represented by a function
+        // so we have:
+        // SUCC(ZERO) = 1
+        // SUCC(SUCC(ZERO)) = 2
+        // SUCC(SUCC(SUCC(ZERO))) = 3
+        //
+        // and so on
         public static Func<dynamic, dynamic, dynamic> ZERO = (z, _) => z;
         public static Func<dynamic, Func<dynamic, dynamic, dynamic>> SUCC = c => (_, i) => i(c);
 
-        public static Func<dynamic, dynamic> PREV = (n) => IF(IS_ZERO(n), ZERO, n(FALSE, ID));
+        // Now we can decrement a number by removing the outer function, effectively by applying it
+        public static Func<dynamic, dynamic> PREV = n => IF(IS_ZERO(n), ZERO, n(FALSE, ID));
 
+        // As ZERO and SUCC have the same signature we can apply a little magic to determine
+        // which is which.
         public static Func<dynamic, Func<dynamic, dynamic, dynamic>> IS_ZERO = n => (t, f) => n(t, CONST1(f));
 
+        // Given to sets each representing a number we can find the total by removing all the items
+        // from one set and adding it to the other.
+        //
+        // As we don't have access to loops we do this using recursion, one item at a time
+        //
+        // Note as the IF doesn't short circuit we have to use some tickery to make sure
+        // the then and else parameters aren't called. Returning a function that returns the result
+        // solves this problem, you will see this pattern everywhere we use an IF.
         public static Func<dynamic, dynamic, Func<dynamic>> _ADD =
             (a, b) => () => IF(IS_ZERO(b), CONST0(a), _ADD(SUCC(a), PREV(b)))();
 
@@ -55,6 +75,7 @@ namespace FunctionalFizzBuzz
 
         public static Func<dynamic, dynamic, dynamic> MUL = (a, b) => _MUL(a, b, ZERO)();
 
+        // LESS_THAN is a race to zero
         public static Func<dynamic, dynamic, Func<Func<dynamic, dynamic, dynamic>>> _LESS_THAN =
             (a, b) => () => IF(IS_ZERO(b), 
                                 CONST0(FALSE), 
@@ -78,14 +99,18 @@ namespace FunctionalFizzBuzz
 
         public static Func<dynamic, dynamic, dynamic> MOD = (n, m) => _MOD(CONST0(n), CONST0(m))();
 
+        // ACTION provides a simple wrapper that both calls a function and returns the same function
         public static Func<dynamic, dynamic> ACTION = a => IF(TRUE, a, a());
+        public static Func<dynamic, dynamic, Func<dynamic>> ACTION2 = (s, a) => () => IF(TRUE, a, a(s));
 
+        // Now we can apply an action over a given range
         public static Func<dynamic, dynamic, dynamic, Func<dynamic>> _WITH_RANGE =
             (n, m, a) => () => IF(LESS_THAN(n(), m()), 
                                 _WITH_RANGE(CONST0(SUCC(n())), m, ACTION(a)), 
                                 CONST0(FALSE))();
 
-        public static Func<dynamic, dynamic, dynamic, dynamic> WITH_RANGE = (n, m, a) => _WITH_RANGE(CONST0(n), CONST0(m), a)();
+        public static Func<dynamic, dynamic, dynamic, dynamic> WITH_RANGE = 
+            (n, m, a) => _WITH_RANGE(CONST0(n), CONST0(m), a)();
 
         // Some constants
         public static Func<dynamic, dynamic, dynamic> ONE = SUCC(ZERO);
@@ -132,6 +157,12 @@ namespace FunctionalFizzBuzz
         public static Func<dynamic, dynamic, dynamic> Y = SUCC(X);
         public static Func<dynamic, dynamic, dynamic> Z = SUCC(Y);
 
+        // Strings are similar to numbers but with the additional requirement of each function
+        // needing to hold an ASCII value
+
+        // We need a couple of functions to extract either the current character or the rest
+        // of the string
+
         public static Func<dynamic, dynamic, dynamic> FIRST = (f, s) => f;
         public static Func<dynamic, dynamic, dynamic> SECOND = (f, s) => s;
 
@@ -148,16 +179,18 @@ namespace FunctionalFizzBuzz
 
         public static Func<dynamic, dynamic, dynamic> JOIN = (l, r) => _JOIN(CONST0(l), CONST0(r))();
 
+        // A few constant strings
         public static Func<dynamic, dynamic, dynamic, dynamic> FIZZ_STR = CHR(F, CHR(I, CHR(Z, CHR(Z, END))));
         public static Func<dynamic, dynamic, dynamic, dynamic> BUZZ_STR = CHR(B, CHR(U, CHR(Z, CHR(Z, END))));
         public static Func<dynamic, dynamic, dynamic, dynamic> FIZZBUZZ_STR = JOIN(FIZZ_STR, BUZZ_STR);
 
+        // And carriage control
         public static Func<dynamic, dynamic, dynamic, dynamic> CRLF = CHR(THIRTEEN, CHR(TEN, END));
 
+        // Applying NULL_FUNCTION returns a NULL_FUNCTION
         public static Func<dynamic> NULL_FUNCTION = () => NULL_FUNCTION;
-        public static Func<dynamic, dynamic, Func<dynamic>> ACTION2 = (s, a) => () => IF(TRUE, a, a(s));
 
-
+        // Print a string, this requires a function that prints a single ASCII character to work
         public static Func<dynamic, dynamic, Func<dynamic>> _PRINT =
             (s, a) => () => IF(IS_END(s()), 
                                 NULL_FUNCTION, 
@@ -165,6 +198,7 @@ namespace FunctionalFizzBuzz
 
         public static Func<dynamic, dynamic, dynamic> PRINT = (s, a) => _PRINT(CONST0(s), CONST0(a))();
 
+        // Convert numbers to strings
         public static Func<dynamic, Func<dynamic>> _NUMTOSTR =
             n =>
                 () =>
@@ -174,11 +208,16 @@ namespace FunctionalFizzBuzz
 
         public static Func<dynamic, dynamic> NUMTOSTR = n => _NUMTOSTR(CONST0(n))();
 
+        // A few helpers for the divisibility tests
         public static Func<dynamic, dynamic, dynamic> DIVISIBLE_BY = (a, b) => IS_ZERO(MOD(a, b));
         public static Func<dynamic, dynamic> DIVISIBLE_BY_THREE = (a) => IS_ZERO(MOD(a, THREE));
         public static Func<dynamic, dynamic> DIVISIBLE_BY_FIVE = (a) => IS_ZERO(MOD(a, FIVE));
         public static Func<dynamic, dynamic> DIVISIBLE_BY_FIFTEEN = (a) => IS_ZERO(MOD(a, FIFTEEN));
 
+        // Produce the correct line based on divisibilty
+        //
+        // As 3 and 5 are coprime we can test for divisibility by 15 to check when a number is 
+        // divisible by both.
         public static Func<dynamic, dynamic> LINE =
             n =>
                 IF(DIVISIBLE_BY_FIFTEEN(n), 
@@ -189,8 +228,10 @@ namespace FunctionalFizzBuzz
                             BUZZ_STR, 
                             NUMTOSTR(n))));
 
+        // Add carriage control to the line
         public static Func<dynamic, dynamic> LINE_WITH_CRLF = (n) => JOIN(LINE(n), CRLF);
 
+        // Finally the completed program
         public static Func<dynamic, dynamic, dynamic, Func<dynamic>> _FIZZ_BUZZ =
             (s, e, o) => () => IF(LESS_THAN(s, e), 
                                     _FIZZ_BUZZ(SUCC(s), e, o), 
