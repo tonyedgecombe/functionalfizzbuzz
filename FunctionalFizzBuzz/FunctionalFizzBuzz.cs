@@ -1,13 +1,5 @@
 ﻿using System;
 
-// ReSharper disable FieldCanBeMadeReadOnly.Global
-
-// ReSharper disable FieldCanBeMadeReadOnly.Local
-// ReSharper disable ArrangeTypeMemberModifiers
-
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable InconsistentNaming
-
 namespace FunctionalFizzBuzz
 {
     public static class FunctionalFizzBuzz
